@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Kicau Math - Player Mode</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body { background: linear-gradient(135deg, #1a472a 0%, #0a2a1a 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { background: #2d5a3b; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        #gameCanvas { background: #87CEEB; border-radius: 15px; display: block; margin-bottom: 15px; cursor: pointer; }
+        .ui-panel { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .question-box { background: #f5e6c8; padding: 15px 25px; border-radius: 15px; flex: 2; text-align: center; box-shadow: inset 0 0 5px rgba(0,0,0,0.1); }
+        #questionText { font-size: 28px; font-weight: bold; color: #2c3e2f; margin-bottom: 10px; }
+        #answerInput { width: 200px; padding: 10px; font-size: 18px; text-align: center; border: 2px solid #ffa500; border-radius: 25px; outline: none; font-weight: bold; }
+        #answerInput:focus { border-color: #4CAF50; box-shadow: 0 0 8px #4CAF50; }
+        .player-status { background: rgba(0,0,0,0.7); padding: 10px 20px; border-radius: 15px; color: white; min-width: 200px; max-height: 150px; overflow-y: auto; font-size: 12px; }
+        .lobby-info { background: #ff9800; padding: 10px 20px; border-radius: 15px; color: white; font-weight: bold; text-align: center; flex: 1; }
+        .back-btn { background: #555; color: white; border: none; border-radius: 10px; padding: 8px 15px; cursor: pointer; margin-bottom: 10px; font-size: 12px; }
+        .back-btn:hover { background: #777; }
+        @media (max-width: 768px) { .ui-panel { flex-direction: column; } #questionText { font-size: 20px; } #answerInput { width: 150px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-btn" onclick="window.location.href='client-lobby.html'">← Kembali ke Lobby</button>
+        <canvas id="gameCanvas" width="1024" height="576"></canvas>
+        <div class="ui-panel">
+            <div class="question-box">
+                <p id="questionText">🐦 KICAU MATH 🐦</p>
+                <input type="text" id="answerInput" placeholder="Ketik jawaban..." autocomplete="off" disabled>
+            </div>
+            <div class="player-status" id="playerStatus"><h4>🐦 Pemain:</h4><div>Menunggu koneksi...</div></div>
+            <div class="lobby-info" id="lobbyInfo"><p>🟡 Memulai...</p></div>
+        </div>
+    </div>
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <script src="client-player.js"></script>
+</body>
+</html>

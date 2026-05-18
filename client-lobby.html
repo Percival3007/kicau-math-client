@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kicau Math - Pilih Role</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #1a472a 0%, #0a2a1a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+        }
+        h1 {
+            font-size: 48px;
+            color: white;
+            text-shadow: 3px 3px 0 #2c3e2f;
+            margin-bottom: 20px;
+        }
+        .subtitle {
+            font-size: 20px;
+            color: #FFD700;
+            margin-bottom: 40px;
+        }
+        .role-buttons {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .role-card {
+            background: rgba(0,0,0,0.7);
+            border-radius: 20px;
+            padding: 30px 40px;
+            width: 280px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-align: center;
+        }
+        .role-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        .player-card {
+            border: 3px solid #4CAF50;
+        }
+        .spectator-card {
+            border: 3px solid #FF9800;
+        }
+        .role-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        .role-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .player-title {
+            color: #4CAF50;
+        }
+        .spectator-title {
+            color: #FF9800;
+        }
+        .role-desc {
+            color: #ccc;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .role-max {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: inline-block;
+        }
+        .status-info {
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 15px;
+            color: white;
+        }
+        .server-status {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        @media (max-width: 768px) {
+            .role-buttons { flex-direction: column; align-items: center; }
+            .role-card { width: 260px; }
+            h1 { font-size: 32px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐦 KICAU MATH 🐦</h1>
+        <div class="subtitle">Balapan Burung × Matematika</div>
+        
+        <div class="role-buttons">
+            <div class="role-card player-card" onclick="window.location.href='client-player.html'">
+                <div class="role-icon">🏃‍♂️</div>
+                <div class="role-title player-title">PEMAIN</div>
+                <div class="role-desc">Ikut berlomba menjawab soal matematika<br>Burungmu akan terbang semakin cepat</div>
+                <div class="role-max">👥 Maksimal 10 pemain</div>
+            </div>
+            
+            <div class="role-card spectator-card" onclick="window.location.href='client-spectator.html'">
+                <div class="role-icon">👁️</div>
+                <div class="role-title spectator-title">PENGAWAS</div>
+                <div class="role-desc">Melihat leaderboard real-time<br>Mengikuti burung tercepat</div>
+                <div class="role-max">👤 Khusus 1 orang</div>
+            </div>
+        </div>
+        
+        <div class="status-info">
+            <span>🔌 Server: </span>
+            <span id="serverStatus" class="server-status">Mengecek koneksi...</span>
+            <div style="margin-top: 10px; font-size: 12px; color: #aaa;">
+                Pastikan server sudah berjalan: node server.js
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Cek koneksi server
+        fetch('http://localhost:3000', { mode: 'no-cors' })
+            .then(() => {
+                document.getElementById('serverStatus').innerHTML = '✅ Terhubung (localhost:3000)';
+                document.getElementById('serverStatus').style.color = '#4CAF50';
+            })
+            .catch(() => {
+                document.getElementById('serverStatus').innerHTML = '❌ Server tidak terdeteksi! Jalankan node server.js';
+                document.getElementById('serverStatus').style.color = '#ff4444';
+            });
+    </script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Kicau Math - Spectator Mode</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: linear-gradient(135deg, #1a472a 0%, #0a2a1a 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { background: #2d5a3b; padding: 20px; border-radius: 20px; }
+        #gameCanvas { background: #87CEEB; border-radius: 15px; display: block; margin-bottom: 15px; }
+        .spectator-bar { background: #ff9800; padding: 10px 20px; border-radius: 15px; color: white; text-align: center; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .spectator-badge { background: #8B00FF; padding: 5px 15px; border-radius: 20px; font-weight: bold; }
+        .start-btn { background: #4CAF50; color: white; border: none; padding: 10px 25px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; transition: transform 0.2s; }
+        .start-btn:hover { transform: scale(1.05); background: #45a049; }
+        .start-btn:disabled { background: #888; cursor: not-allowed; transform: none; }
+        .leaderboard-panel { background: rgba(0,0,0,0.85); padding: 15px; border-radius: 15px; color: white; min-width: 300px; max-height: 400px; overflow-y: auto; }
+        .leaderboard-panel h3 { margin: 0 0 10px 0; text-align: center; color: gold; }
+        .leaderboard-item { display: flex; justify-content: space-between; padding: 8px 10px; border-bottom: 1px solid #444; font-size: 14px; }
+        .rank-1 { color: gold; font-weight: bold; }
+        .rank-2 { color: silver; }
+        .rank-3 { color: #cd7f32; }
+        .winner-announce { background: gold; color: black; padding: 10px; border-radius: 10px; text-align: center; font-weight: bold; margin-top: 10px; }
+        .back-btn { background: #555; color: white; border: none; border-radius: 10px; padding: 8px 15px; cursor: pointer; font-size: 12px; }
+        .back-btn:hover { background: #777; }
+        .player-count { background: #2c3e2f; padding: 5px 10px; border-radius: 15px; font-size: 12px; }
+        @media (max-width: 768px) { .spectator-bar { flex-direction: column; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-btn" onclick="window.location.href='client-lobby.html'">← Kembali ke Lobby</button>
+        <div class="spectator-bar">
+            <span class="spectator-badge">👁️ MODE PENGAWAS / SPECTATOR</span>
+            <span id="playerCount" class="player-count">👥 0/10 pemain</span>
+            <button id="startGameBtn" class="start-btn" disabled>🎮 START GAME</button>
+        </div>
+        <canvas id="gameCanvas" width="1024" height="576"></canvas>
+        <div class="leaderboard-panel">
+            <h3>🏆 LEADERBOARD 🏆</h3>
+            <div id="leaderboardList">Menunggu data...</div>
+            <div id="winnerInfo" class="winner-announce" style="display:none;"></div>
+        </div>
+    </div>
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <script src="client-spectator.js"></script>
+</body>
+</html>
