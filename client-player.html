@@ -25,7 +25,7 @@
             padding: 15px;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            max-width: 1024px;
+            max-width: 900px;  /* DIPERKECIL dari 1024px jadi 900px */
             width: 100%;
             margin: 0 auto;
         }
@@ -133,12 +133,13 @@
             font-size: 0.7rem;
             margin-bottom: 10px;
         }
-        /* Untuk layar lebih kecil dari 1024px */
-        @media (max-width: 1024px) {
+        /* Untuk layar lebih kecil dari 900px (termasuk HP) */
+        @media (max-width: 900px) {
             body {
                 padding: 10px;
             }
             .container {
+                max-width: 100%;
                 padding: 12px;
             }
         }
