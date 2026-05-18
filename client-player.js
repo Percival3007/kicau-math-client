@@ -312,7 +312,7 @@ function showNameInput() {
 }
 
 function connectToServer() {
-    socket = io('http://localhost:3000');
+    socket = io('https://kicau-math.onrender.com');
     
     socket.on('connect', () => {
         socket.emit('join-as-player', playerName, (res) => {
