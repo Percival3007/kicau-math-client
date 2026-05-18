@@ -1,9 +1,10 @@
-// KICAU MATH - PLAYER MODE (Track 7.450px, Kecepatan Dinamis)
+// KICAU MATH - PLAYER MODE (Responsif Android + Perbaikan Multiplayer)
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const questionText = document.getElementById('questionText');
 const answerInput = document.getElementById('answerInput');
+const submitBtn = document.getElementById('submitBtn');
 const playerStatus = document.getElementById('playerStatus');
 const lobbyInfo = document.getElementById('lobbyInfo');
 
@@ -19,7 +20,7 @@ let playerName = '';
 let imagesLoaded = false;
 let lobbyImageLoaded = false;
 
-// KONFIGURASI TRACK (7.450px)
+// Konfigurasi
 const TRACK_LENGTH = 7450;
 const FINISH_LINE_X = 7450;
 const START_X = 50;
@@ -28,7 +29,6 @@ const CANVAS_HEIGHT = 576;
 const MAX_SPEED = 200;
 const MIN_SPEED = 50;
 
-// Posisi Y untuk 10 pemain
 const BIRD_Y_POSITIONS = {
     1: 40, 2: 85, 3: 130, 4: 175, 5: 220,
     6: 265, 7: 310, 8: 355, 9: 400, 10: 445
@@ -36,7 +36,7 @@ const BIRD_Y_POSITIONS = {
 
 const playerColors = {
     1: '#FF4444', 2: '#44FF44', 3: '#FFAA44', 4: '#4444FF', 5: '#FF44FF',
-    6: '#44FFFF', 7: '#FF8844', 8: '#88FF44', 9: '#FF4488', 10: '#44FF88'
+    6: '#44FFFF', 7: '#FF8844', 8: '#88FF44', 9: '#333333', 10: '#CCCCCC'
 };
 
 let cameraX = 0;
@@ -46,8 +46,6 @@ let playerAnswers = 0;
 let currentFrame = 0;
 let lastFrameChange = 0;
 let leaderboardData = [];
-let lastLocalX = START_X;
-let lastUpdateTime = 0;
 let lastServerSend = 0;
 
 // Load gambar
@@ -55,7 +53,7 @@ const images = {
     sky: new Image(),
     lobby: new Image()
 };
-const birdNames = ['red', 'green', 'yellow', 'blue', 'purple', 'cyan', 'orange', 'lime', 'pink', 'mint'];
+const birdNames = ['red', 'green', 'yellow', 'blue', 'purple', 'cyan', 'orange', 'lime', 'black', 'white'];
 
 birdNames.forEach(name => {
     images[`bird_${name}_frame1`] = new Image();
@@ -284,21 +282,42 @@ function updateLeaderboard() {
     const allPlayers = [];
     if (localPlayer) allPlayers.push({ ...localPlayer, isMe: true });
     for (let id in otherPlayers) {
-        allPlayers.push({ ...otherPlayers[id], isMe: false });
+        if (otherPlayers[id] && otherPlayers[id].x !== undefined) {
+            allPlayers.push({ ...otherPlayers[id], isMe: false });
+        }
     }
-    allPlayers.sort((a, b) => b.x - a.x);
+    allPlayers.sort((a, b) => (b.x || 0) - (a.x || 0));
     leaderboardData = allPlayers.map((p, idx) => ({
-        rank: idx + 1, name: p.name, speed: p.speed, isMe: p.isMe
+        rank: idx + 1, name: p.name, speed: p.speed || MIN_SPEED, isMe: p.isMe
     }));
 }
 
 function updateCamera() {
     if (!gameStarted || !localPlayer) return;
-    
     let target = localPlayer.x - CANVAS_WIDTH / 3.5;
     target = Math.max(0, Math.min(target, TRACK_LENGTH - CANVAS_WIDTH));
     targetCameraX = target;
     cameraX = cameraX + (targetCameraX - cameraX) * 0.06;
+}
+
+function sendAnswer() {
+    if (!gameStarted || !currentQuestion || winner || isWaitingForResponse) return;
+    const answer = parseInt(answerInput.value);
+    if (!isNaN(answer)) {
+        isWaitingForResponse = true;
+        socket.emit('player-answer', answer);
+        answerInput.value = '';
+        answerInput.disabled = true;
+        submitBtn.disabled = true;
+        setTimeout(() => {
+            if (gameStarted) {
+                answerInput.disabled = false;
+                submitBtn.disabled = false;
+                isWaitingForResponse = false;
+                answerInput.focus();
+            }
+        }, 1000);
+    }
 }
 
 function showNameInput() {
@@ -356,16 +375,14 @@ function connectToServer() {
         data.players.forEach(p => {
             if (p.id === socket.id) {
                 localPlayer = p;
-                lastLocalX = p.x;
             } else {
-                otherPlayers[p.id] = p;
-                otherPlayers[p.id].targetX = p.x;
-                otherPlayers[p.id].currentX = p.x;
+                otherPlayers[p.id] = { ...p, targetX: p.x };
             }
         });
         
         socket.emit('request-question');
         answerInput.disabled = false;
+        submitBtn.disabled = false;
         answerInput.focus();
         lobbyInfo.innerHTML = '<p style="background:green;color:yellow;padding:5px;">🏁 RACE START! Jawab soal! 🏁</p>';
         
@@ -377,6 +394,7 @@ function connectToServer() {
         currentQuestion = q;
         questionText.innerText = q.text;
         answerInput.disabled = false;
+        submitBtn.disabled = false;
         answerInput.focus();
         isWaitingForResponse = false;
     });
@@ -410,9 +428,9 @@ function connectToServer() {
                 if (p.id === socket.id && localPlayer) {
                     localPlayer.x = p.x;
                     localPlayer.speed = p.speed;
-                    lastLocalX = p.x;
                 } else if (otherPlayers[p.id]) {
                     otherPlayers[p.id].targetX = p.x;
+                    otherPlayers[p.id].x = otherPlayers[p.id].x || p.x;
                     otherPlayers[p.id].speed = p.speed;
                 }
             });
@@ -426,6 +444,7 @@ function connectToServer() {
         const t = (Date.now() - raceStartTime) / 1000;
         lobbyInfo.innerHTML = `<p style="background:gold;color:black;padding:10px;">🏆 ${data.winner} MENANG! 🏆<br>⏱️ ${Math.floor(t/60)}m ${Math.floor(t%60)}s | ✅ ${playerAnswers} jawaban</p>`;
         answerInput.disabled = true;
+        submitBtn.disabled = true;
         drawLobbyScreen();
     });
     
@@ -435,7 +454,6 @@ function connectToServer() {
 }
 
 let lastFrameTime = 0;
-let lastServerSendTime = 0;
 
 function gameLoop(currentTime) {
     currentTime = currentTime || 0;
@@ -459,16 +477,17 @@ function gameLoop(currentTime) {
         localPlayer.x += localPlayer.speed * deltaTime;
         if (localPlayer.x > FINISH_LINE_X) localPlayer.x = FINISH_LINE_X;
         
-        if (currentTime - lastServerSendTime > 100) {
+        if (currentTime - lastServerSend > 100) {
             socket.emit('position-update', { x: localPlayer.x });
-            lastServerSendTime = currentTime;
+            lastServerSend = currentTime;
         }
     }
     
+    // INTERPOLASI untuk burung lain (gerakan halus)
     for (let id in otherPlayers) {
         const p = otherPlayers[id];
-        if (p.targetX !== undefined) {
-            p.x = p.x + (p.targetX - p.x) * 0.25;
+        if (p && p.targetX !== undefined) {
+            p.x = (p.x || p.targetX) + (p.targetX - (p.x || p.targetX)) * 0.3;
         }
     }
     
@@ -487,14 +506,16 @@ function gameLoop(currentTime) {
     drawGameBackground();
     drawFinishLine();
     
+    // Gambar burung lain
     for (let id in otherPlayers) {
         const p = otherPlayers[id];
-        if (p.x) {
+        if (p && p.x) {
             const y = BIRD_Y_POSITIONS[p.birdIndex] || 220;
             drawBird(p.x, y, p.birdIndex, false, p.speed, p.name);
         }
     }
     
+    // Gambar burung lokal
     if (localPlayer && gameStarted) {
         const y = BIRD_Y_POSITIONS[localPlayer.birdIndex] || 220;
         drawBird(localPlayer.x, y, localPlayer.birdIndex, true, localPlayer.speed, localPlayer.name);
@@ -517,27 +538,20 @@ function gameLoop(currentTime) {
     requestAnimationFrame(gameLoop);
 }
 
+// Event: Tombol Enter dan Tombol Kirim
 answerInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter' && gameStarted && currentQuestion && !winner && !isWaitingForResponse) {
-        const ans = parseInt(answerInput.value);
-        if (!isNaN(ans)) {
-            isWaitingForResponse = true;
-            socket.emit('player-answer', ans);
-            answerInput.value = '';
-            answerInput.disabled = true;
-            setTimeout(() => {
-                if (gameStarted) {
-                    answerInput.disabled = false;
-                    isWaitingForResponse = false;
-                }
-            }, 1000);
-        }
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        sendAnswer();
     }
+});
+submitBtn.addEventListener('click', () => {
+    sendAnswer();
 });
 
 function start() {
     if (imagesLoaded) {
-        console.log('🚀 PLAYER MODE READY - Track 7.450px');
+        console.log('🚀 PLAYER MODE READY - Responsif + Multiplayer Fix');
         drawLobbyScreen();
     } else {
         setTimeout(start, 200);
